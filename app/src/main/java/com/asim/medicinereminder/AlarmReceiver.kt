@@ -1,0 +1,6 @@
+package com.asim.medicinereminder
+import android.app.*
+import android.content.*
+import androidx.core.app.NotificationCompat
+class AlarmReceiver:BroadcastReceiver(){override fun onReceive(c:Context,i:Intent){val id=i.getLongExtra("id",0);val name=i.getStringExtra("name")?:"Medicine";val dose=i.getStringExtra("dose")?:"";val nm=c.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager;val channel="medicine_alarm";nm.createNotificationChannel(NotificationChannel(channel,"Medicine alarms",NotificationManager.IMPORTANCE_HIGH));val full=Intent(c,AlarmActivity::class.java).putExtras(i.extras!!).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP);val fp=PendingIntent.getActivity(c,id.toInt(),full,PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE);val n=NotificationCompat.Builder(c,channel).setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("Time to take "+name).setContentText(dose).setCategory(NotificationCompat.CATEGORY_ALARM).setPriority(NotificationCompat.PRIORITY_MAX).setOngoing(true).setAutoCancel(false).setFullScreenIntent(fp,true).build();nm.notify(id.toInt(),n)}}
+class BootReceiver:BroadcastReceiver(){override fun onReceive(c:Context,i:Intent){Store.medicines(c).forEach{AlarmScheduler.scheduleDaily(c,it)}}}
